@@ -63,6 +63,11 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>inputLogin</tabstop>
+  <tabstop>inputPass</tabstop>
+  <tabstop>btnLogin</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

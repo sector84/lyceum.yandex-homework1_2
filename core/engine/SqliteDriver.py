@@ -17,16 +17,24 @@ class SqliteDriver(Errors, metaclass=SqliteDrvSingleton):
 
     def __init__(self, *, db_name: str = 'postgres'):
         self.db_name = db_name
-        self._driver = None
+        self._connection = None
+        self._cursor = None
+
+    def init_driver(self, database):
+        """Инициализация подключения, курсора и всякое это вот"""
+        self._connection = sqlite3.connect(database)
+        self._connection.row_factory = sqlite3.Row
+        self._cursor = self._connection.cursor()
+
 
     def close(self):
         """Закрытие подключения."""
-        if self._driver:
-            self._driver.close()
+        if self._connection:
+            self._connection.close()
 
     @property
     def driver_exists(self):
-        return self._driver is not None
+        return self._connection is not None
 
     def catch(self, error: Exception, text: str):
         """Перехват и обработка ошибки запроса."""
@@ -38,7 +46,7 @@ class SqliteDriver(Errors, metaclass=SqliteDrvSingleton):
         msg = 'ошибка синтаксиса или данных'
         self.error('%s (%s)' % (msg, error_str))
 
-    async def select(
+    def select(
             self, text: str, args: list = None, one_row: bool = False,
             list_type: object = None, item_type: object = None
     ):
@@ -56,20 +64,16 @@ class SqliteDriver(Errors, metaclass=SqliteDrvSingleton):
             args = []
 
         try:
-            with self._driver.cursor() as con:
-                if one_row:
-                    # todo: уточнить как оно отработает https://docs.python.org/3/library/sqlite3.html#sqlite3.Row
-                    return item_type(self.expect(
-                        con.fetchone(text, *args),
-                        msg='',
-                        status=404)
-                    )
+            if one_row:
+                self._cursor.execute(text, args)
+                row = self.expect(self._cursor.fetchone(), msg='', code=404)
+                return item_type({k: row[k] for k in row.keys()})
 
-                result = list_type()
-                for row in con.execute(text, *args):
-                    result.append(item_type(row))
-                return result
-                # todo: добавить возможность выборки через генератор
+            result = list_type()
+            for row in self._cursor.execute(text, *args):
+                result.append(item_type(row))
+            return result
+            # todo: добавить возможность выборки через генератор
         except Error as e:
             raise e
         except sqlite3.Error as error:
@@ -77,8 +81,8 @@ class SqliteDriver(Errors, metaclass=SqliteDrvSingleton):
         except Exception as error:
             self.catch(error, text)
 
-    async def execute(self, text: str, args: list = None,
-                      many: bool = False, with_result: bool = False):
+    def execute(self, text: str, args: list = None,
+                many: bool = False, with_result: bool = False):
         """Хелпер для выполнения всех запросов, кроме select.
 
         :param text:        Текст запроса с подстановками из args
@@ -88,21 +92,18 @@ class SqliteDriver(Errors, metaclass=SqliteDrvSingleton):
         """
         if args is None:
             args = []
-        async with self._driver.cursor() as con:
-            try:
-                # Выполняем запрос
-                if many:
-                    con.executemany(text, args)
-                else:
-                    if with_result:
-                        # например если в запросе есть RETURNING id или что-то такое
-                        return con.fetchone(text, *args)
-                    else:
-                        con.execute(text, *args)
-            except sqlite3.Error as error:
-                self.catch(error, text)
-            except Exception as error:
-                self.catch(error, text)
+        try:
+            # Выполняем запрос
+            if many:
+                self._cursor.executemany(text, args)
+            else:
+                self._cursor.execute(text, *args)
+                if with_result:
+                    return self._cursor.lastrowid
+        except sqlite3.Error as error:
+            self.catch(error, text)
+        except Exception as error:
+            self.catch(error, text)
 
 
 def create_sqlite_driver(database: str = None) -> SqliteDriver:
@@ -113,7 +114,7 @@ def create_sqlite_driver(database: str = None) -> SqliteDriver:
     database = database or config.DB_CONF['dbname']
     result = SqliteDriver(db_name=database)
     if not result.driver_exists:
-        result._driver = sqlite3.connect(database)
+        result.init_driver(database)
     return result
 
 

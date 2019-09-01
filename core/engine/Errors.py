@@ -5,6 +5,7 @@ class Error(Exception):
 
     CODE_UNKNOWN = 0
     CODE_UNAUTHORIZED = 401
+    CODE_NOT_FOUND = 404
 
     def __init__(
             self, message: str = None, code=None, data=None

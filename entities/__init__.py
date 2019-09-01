@@ -1,11 +1,21 @@
 from .User import (
     User,
-    Projects,
+    Users,
 )
-from .User import User
+from .Expense import (
+    Expense,
+    Expenses,
+)
+from .Income import (
+    Income,
+    Incomes,
+)
 
 __all__ = [
-    'Projects',
     'User',
-    'User',
+    'Users',
+    'Expense',
+    'Expenses',
+    'Income',
+    'Incomes',
 ]

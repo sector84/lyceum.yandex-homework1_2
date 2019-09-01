@@ -19,10 +19,10 @@ class User(BaseItem):
     MAPPING_JSON = {
         # self_name -> json_name
         'ID': "id",
-        'role_id': "role_id",
-        'role_name': "role_name",
         'login': "login",
+        'password': "password",
         'name': "name",
+        'is_admin': 'is_admin',
     }
     ERR_PREFIX = 'Ошибка работы с пользователем'
 
@@ -30,34 +30,32 @@ class User(BaseItem):
         """Правильное представление для сериализации в JSON через ujson."""
         return {
             'id': self.ID,
-            'role_id': self.role_id,
-            'role_name': self.role_name,
             'login': self.login,
             'name': self.name,
+            'password': self.password,
+            'is_admin': self.is_admin,
         }
 
     def _check(self):
         """Проверка данных"""
         if 'id' in self:
             self.ID = self['id']
-        self.role_id = self['role_id']
-        self.role_name = self['role_name']
         self.login = self['login']
+        self.password = self['password']
         self.name = self['name']
-        self.passw = ''
+        self.is_admin = self['is_admin']
 
     def _create(self):
         """."""
         GLog.debug('Вставка пользователя в БД')
-        passw = self.check_str(self.passw, arg='Пароль пользователя')
+        passw = self.check_str(self.password, arg='Пароль пользователя')
         passw = sha256(passw.encode('utf-8')).hexdigest()
         self.ID = self.db().execute('''
             INSERT INTO "users" (
-                "id_role", "login", "passw", "name"
-            ) VALUES ($1, $2, $3, $4)
-            RETURNING "id";
+                "login", "passw", "name", "is_admin"
+            ) VALUES (?, ?, ?, ?);
         ''', [
-            self.role_id, self.login, passw, self.name
+            self.login, passw, self.name, self.is_admin
         ], with_result=True)
 
     def _update(self):
@@ -67,13 +65,13 @@ class User(BaseItem):
         passw = sha256(passw.encode('utf-8')).hexdigest()
         self.db().execute('''
             UPDATE "users" SET 
-                "id_role" = $1,
-                "login" = $2,
-                "passw" = $3,
-                "name" = $4
-            WHERE "id" = $5;
+                "login" = ?,
+                "passw" = ?,
+                "name" = ?,
+                "is_admin" = ?
+            WHERE "id" = ?;
         ''', [
-            self.role_id, self.login, passw, self.name, self.ID
+            self.login, passw, self.name, self.is_admin, self.ID
         ])
 
     def _delete(self):
@@ -81,7 +79,7 @@ class User(BaseItem):
         GLog.debug('Удаление пользователя из БД')
         self.db().execute('''
             DELETE FROM "users"
-            WHERE "id" = $1;
+            WHERE "id" = ?;
         ''', [
             self.ID
         ])
@@ -95,20 +93,12 @@ class User(BaseItem):
         self['id'] = self.check_int(new_one, 'Идентификатор пользователя')
 
     @property
-    def role_id(self):
-        return self['role_id']
+    def is_admin(self):
+        return self['is_admin']
 
-    @role_id.setter
-    def role_id(self, new_one):
-        self['role_id'] = self.check_int(new_one, 'Идентификатор роли')
-
-    @property
-    def role_name(self):
-        return self['role_name']
-
-    @role_name.setter
-    def role_name(self, new_one):
-        self['role_name'] = self.check_str(new_one, 'Имя роли')
+    @is_admin.setter
+    def is_admin(self, new_one):
+        self['is_admin'] = self.check_int(new_one, 'Флаг администратора')
 
     @property
     def login(self):
@@ -125,6 +115,25 @@ class User(BaseItem):
     @name.setter
     def name(self, new_one):
         self['name'] = self.check_str(new_one, arg='Имя пользователя', allow_empty=True)
+
+    @classmethod
+    def select_by_credentials(cls, login: str, password: str) -> BaseItem:
+        """Создание пользователя.
+
+        :param login:       логин пользователя
+        :param password:    пароль пользователя
+        :rtype: entities.User
+        """
+        GLog.info('Выборка пользователя по логину/паролю')
+        password = cls.check_str(password, arg='Пароль пользователя')
+        password = sha256(password.encode('utf-8')).hexdigest()
+        db = create_sqlite_driver()
+        sql = '''
+            SELECT * FROM "users" 
+            WHERE "login" = ? AND "passw" = ?;
+        '''
+        args = [login, password]
+        return db.select(sql, args, one_row=True, item_type=User)
 
     @classmethod
     def create(cls, role_id: int, data: dict) -> BaseItem:
@@ -175,21 +184,14 @@ class Users(BaseList):
     ERR_PREFIX = 'Ошибка работы со списком пользователей'
 
     @classmethod
-    async def list(cls, role_id: int) -> BaseList:
+    async def list(cls) -> BaseList:
         """Список пользователей.
 
-        :param role_id:     Идентификатор роли пользователя (0 - все пользователи)
         :rtype entities.Users
         """
         GLog.info('Запрос списка пользователей')
 
-        args = [role_id]
-        GLog.debug('Запрос пользователей: args=%s', args)
-
         db = create_sqlite_driver()
-        if role_id == 0:
-            sql = 'SELECT * FROM "users";'
-            args = []
-        else:
-            sql = 'SELECT * FROM "users" WHERE id_role = $1;'
+        sql = 'SELECT * FROM "users";'
+        args = []
         return db.select(sql, args, list_type=cls, item_type=User)
