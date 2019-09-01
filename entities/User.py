@@ -60,6 +60,32 @@ class User(BaseItem):
             self.role_id, self.login, passw, self.name
         ], with_result=True)
 
+    def _update(self):
+        """."""
+        GLog.debug('Изменениее пользователя в БД')
+        passw = self.check_str(self.passw, arg='Пароль пользователя')
+        passw = sha256(passw.encode('utf-8')).hexdigest()
+        self.db().execute('''
+            UPDATE "users" SET 
+                "id_role" = $1,
+                "login" = $2,
+                "passw" = $3,
+                "name" = $4
+            WHERE "id" = $5;
+        ''', [
+            self.role_id, self.login, passw, self.name, self.ID
+        ])
+
+    def _delete(self):
+        """."""
+        GLog.debug('Удаление пользователя из БД')
+        self.db().execute('''
+            DELETE FROM "users"
+            WHERE "id" = $1;
+        ''', [
+            self.ID
+        ])
+
     @property
     def ID(self):
         return self['id']
@@ -102,11 +128,11 @@ class User(BaseItem):
 
     @classmethod
     def create(cls, role_id: int, data: dict) -> BaseItem:
-        """Создание проекта.
+        """Создание пользователя.
 
-        :param role_id: идентификатор роли пользователя
-        :param data:     данные проекта
-        :rtype: entities.Project
+        :param role_id:  идентификатор роли пользователя
+        :param data:     данные пользователя
+        :rtype: entities.User
         """
         GLog.info('Создание пользователя')
         data.update({'role_id': role_id})
@@ -114,8 +140,33 @@ class User(BaseItem):
         res._create()
         return res
 
+    @classmethod
+    def edit(cls, user_id: int, data: dict) -> BaseItem:
+        """Изменение пользователя.
 
-class Projects(BaseList):
+        :param user_id:       идентификатор пользователя
+        :param data:     данные пользователя
+        :rtype: entities.User
+        """
+        GLog.info('Изменение пользователя')
+        data.update({'id': user_id})
+        res = User().load_from_json(data)
+        res._update()
+        return res
+
+    @classmethod
+    def delete(cls, user_id: int):
+        """Удаление пользователя.
+
+        :param user_id:   идентификатор пользователя
+        :rtype: None
+        """
+        GLog.info('Удаление пользователя')
+        res = User().load_from_json({'id': user_id})
+        res._delete()
+
+
+class Users(BaseList):
     """Список пользователей.
 
     :param list data:   Данные для инициализации
@@ -124,23 +175,21 @@ class Projects(BaseList):
     ERR_PREFIX = 'Ошибка работы со списком пользователей'
 
     @classmethod
-    async def list(cls, role_id: int, include: list = None) -> BaseList:
-        """Список проектов.
+    async def list(cls, role_id: int) -> BaseList:
+        """Список пользователей.
 
         :param role_id:     Идентификатор роли пользователя (0 - все пользователи)
-        :param include:     Доп. параметры ответа
-        :rtype entities.Projects
+        :rtype entities.Users
         """
         GLog.info('Запрос списка пользователей')
 
-        include = include or []
         args = [role_id]
-        GLog.debug('Запрос пользователей: include=%s args=%s', include, args)
+        GLog.debug('Запрос пользователей: args=%s', args)
 
         db = create_sqlite_driver()
         if role_id == 0:
             sql = 'SELECT * FROM "users";'
             args = []
         else:
-            sql = 'SELECT * FROM "projects" WHERE id_role = $1;'
+            sql = 'SELECT * FROM "users" WHERE id_role = $1;'
         return db.select(sql, args, list_type=cls, item_type=User)
