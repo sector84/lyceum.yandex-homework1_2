@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from core.base import (
     BaseList,
     BaseItem,
@@ -46,8 +48,7 @@ class Expense(BaseItem):
         self.ID = self.db().execute('''
             INSERT INTO "expenses" (
                 "date", "value", "note"
-            ) VALUES ($1, $2, $3)
-            RETURNING "id";
+            ) VALUES (?, ?, ?);
         ''', [
             self.date, self.value, self.note
         ], with_result=True)
@@ -57,10 +58,10 @@ class Expense(BaseItem):
         GLog.debug('Изменениее расхода в БД')
         self.db().execute('''
             UPDATE "expenses" SET 
-                "date" = $1,
-                "value" = $2,
-                "note" = $3
-            WHERE "id" = $4;
+                "date" = ?,
+                "value" = ?,
+                "note" = ?
+            WHERE "id" = ?;
         ''', [
             self.date, self.value, self.note, self.ID
         ])
@@ -70,7 +71,7 @@ class Expense(BaseItem):
         GLog.debug('Удаление расхода из БД')
         self.db().execute('''
             DELETE FROM "expenses"
-            WHERE "id" = $1;
+            WHERE "id" = ?;
         ''', [
             self.ID
         ])
@@ -85,10 +86,12 @@ class Expense(BaseItem):
 
     @property
     def date(self):
-        return self['date']
+        # возвращаем в человеко-читаемом виде вместо unix timestamp
+        return datetime.utcfromtimestamp(self['date']).strftime('%Y-%m-%d %H:%M:%S')
 
     @date.setter
     def date(self, new_one):
+        # todo: привести к unix timestamp
         self['date'] = self.check_int(new_one, 'Дата расхода')
 
     @property
@@ -154,18 +157,14 @@ class Expenses(BaseList):
     ERR_PREFIX = 'Ошибка работы со списком расходов'
 
     @classmethod
-    async def list(cls, include: list = None) -> BaseList:
+    def list(cls) -> BaseList:
         """Список расходов.
 
-        :param include:     Доп. параметры ответа
         :rtype entities.Users
         """
-        GLog.info('Запрос списка пользователей')
-
-        include = include or []
-        GLog.debug('Запрос расходов: include=%s', include)
+        GLog.info('Запрос списка расходов')
 
         db = create_sqlite_driver()
-        sql = 'SELECT * FROM "expenses";'
+        sql = 'SELECT * FROM "expenses" ORDER BY "date" DESC;'
         args = []
         return db.select(sql, args, list_type=cls, item_type=Expense)

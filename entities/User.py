@@ -188,7 +188,7 @@ class Users(BaseList):
     ERR_PREFIX = 'Ошибка работы со списком пользователей'
 
     @classmethod
-    async def list(cls) -> BaseList:
+    def list(cls) -> BaseList:
         """Список пользователей.
 
         :rtype entities.Users
