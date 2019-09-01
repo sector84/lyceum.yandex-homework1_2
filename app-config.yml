@@ -1,0 +1,4 @@
+storage_sqlite:
+  dbname: finances-demo.sqlite
+
+debug_level: 5
