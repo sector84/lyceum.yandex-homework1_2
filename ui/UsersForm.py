@@ -49,12 +49,17 @@ class UsersForm(QMainWindow):
         State[STATE_KEY_ELEMENT] = None
         self.add_edit_dialog.init_value()
         if self.add_edit_dialog.exec():
-            user = User.create({
-                'is_admin': self.add_edit_dialog.isAdmin.isChecked(),
-                'name': self.add_edit_dialog.userName.text(),
-                'login': self.add_edit_dialog.userLogin.text(),
-                'password': self.add_edit_dialog.userPassword.text(),
-            })
+            try:
+                user = User.create({
+                    'is_admin': self.add_edit_dialog.isAdmin.isChecked(),
+                    'name': self.add_edit_dialog.userName.text(),
+                    'login': self.add_edit_dialog.userLogin.text(),
+                    'password': self.add_edit_dialog.userPassword.text(),
+                })
+            except Exception as e:
+                # todo: хорошо бы конечно оповщение о том что пошло не так - но не в этой жизни...
+                GLog.error("ui.UsersForm.add_item :: error :%s" % e)
+                return
             row_number = self.table.rowCount()
             self.table.insertRow(row_number)
             self.table.setItem(row_number, 0, QTableWidgetItem(str(user.ID)))
@@ -81,12 +86,17 @@ class UsersForm(QMainWindow):
         self.add_edit_dialog.init_value()
         if not self.add_edit_dialog.exec():
             return
-        user = User.edit(State[STATE_KEY_ELEMENT]['id'], {
-            'is_admin': self.add_edit_dialog.isAdmin.isChecked(),
-            'name': self.add_edit_dialog.userName.text(),
-            'login': self.add_edit_dialog.userLogin.text(),
-            'password': self.add_edit_dialog.userPassword.text(),
-        })
+        try:
+            user = User.edit(State[STATE_KEY_ELEMENT]['id'], {
+                'is_admin': self.add_edit_dialog.isAdmin.isChecked(),
+                'name': self.add_edit_dialog.userName.text(),
+                'login': self.add_edit_dialog.userLogin.text(),
+                'password': self.add_edit_dialog.userPassword.text(),
+            })
+        except Exception as e:
+            # todo: хорошо бы конечно оповщение о том что пошло не так - но не в этой жизни...
+            GLog.error("ui.UsersForm.edit_item :: error :%s" % e)
+            return
         self.table.setItem(index.row(), 0, QTableWidgetItem(str(user.ID)))
         self.table.setItem(index.row(), 1, QTableWidgetItem(user.name))
         self.table.setItem(index.row(), 2, QTableWidgetItem(user.login))
@@ -108,5 +118,10 @@ class UsersForm(QMainWindow):
         if reply == QMessageBox.Yes:
             for index in sorted(rows, reverse=True):
                 GLog.debug('remove_item :: row: %s => User.ID:%s' % (index.row(), self.table.item(index.row(), 0).text()))
-                User.delete(self.table.item(index.row(), 0).text())
+                try:
+                    User.delete(self.table.item(index.row(), 0).text())
+                except Exception as e:
+                    # todo: хорошо бы конечно оповщение о том что пошло не так - но не в этой жизни...
+                    GLog.error("ui.UsersForm.remove_item :: error :%s" % e)
+                    return
                 self.table.model().removeRow(index.row())
