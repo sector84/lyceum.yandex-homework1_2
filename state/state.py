@@ -1,8 +1,10 @@
 STATE_KEY_USER = 'cur_user'
+STATE_KEY_ELEMENT = 'cur_element'
 STATE_KEY_SECTION = 'cur_section'
 
 State = {
     STATE_KEY_USER: None,
+    STATE_KEY_ELEMENT: None,
     STATE_KEY_SECTION: None,
 }
 

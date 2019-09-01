@@ -70,7 +70,7 @@ class SqliteDriver(Errors, metaclass=SqliteDrvSingleton):
                 return item_type({k: row[k] for k in row.keys()})
 
             result = list_type()
-            for row in self._cursor.execute(text, *args):
+            for row in self._cursor.execute(text, args):
                 result.append(item_type(row))
             return result
             # todo: добавить возможность выборки через генератор
@@ -96,8 +96,10 @@ class SqliteDriver(Errors, metaclass=SqliteDrvSingleton):
             # Выполняем запрос
             if many:
                 self._cursor.executemany(text, args)
+                self._connection.commit()
             else:
-                self._cursor.execute(text, *args)
+                self._cursor.execute(text, args)
+                self._connection.commit()
                 if with_result:
                     return self._cursor.lastrowid
         except sqlite3.Error as error:

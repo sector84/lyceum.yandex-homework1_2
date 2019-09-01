@@ -1,8 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from ui import LoginForm, MainForm, UsersForm
-from state import State, STATE_KEY_SECTION, STATE_SECTION_MAIN_EXPENSES, STATE_SECTION_ADMIN_USERS, \
-    STATE_SECTION_MAIN_INCOMES
+from ui import LoginForm, MainForm, UsersForm, UserAddEditDialog
+from state import *
 
 
 def actualize_visual_state():
@@ -29,8 +28,9 @@ def on_login_success():
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    mainForm = MainForm()
-    usersForm = UsersForm()
+    mainForm = MainForm(actualize_visual_state)
+    usersForm = UsersForm(actualize_visual_state)
+    usersForm.add_edit_dialog = UserAddEditDialog(usersForm)
     loginForm = LoginForm(on_login_success)
     loginForm.show()
     sys.exit(app.exec())

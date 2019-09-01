@@ -45,6 +45,9 @@
        <property name="text">
         <string/>
        </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="2" column="1">
@@ -82,14 +85,14 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="ok">
+      <widget class="QPushButton" name="bntSave">
        <property name="text">
         <string>Ok</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cancel">
+      <widget class="QPushButton" name="btnCancel">
        <property name="text">
         <string>Cancel</string>
        </property>
@@ -99,6 +102,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>isAdmin</tabstop>
+  <tabstop>userName</tabstop>
+  <tabstop>userLogin</tabstop>
+  <tabstop>userPassword</tabstop>
+  <tabstop>bntSave</tabstop>
+  <tabstop>btnCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

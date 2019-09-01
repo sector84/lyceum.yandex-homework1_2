@@ -61,7 +61,7 @@ class User(BaseItem):
     def _update(self):
         """."""
         GLog.debug('Изменениее пользователя в БД')
-        passw = self.check_str(self.passw, arg='Пароль пользователя')
+        passw = self.check_str(self.password, arg='Пароль пользователя')
         passw = sha256(passw.encode('utf-8')).hexdigest()
         self.db().execute('''
             UPDATE "users" SET 
@@ -140,7 +140,7 @@ class User(BaseItem):
         return db.select(sql, args, one_row=True, item_type=User)
 
     @classmethod
-    def create(cls, role_id: int, data: dict) -> BaseItem:
+    def create(cls, data: dict) -> BaseItem:
         """Создание пользователя.
 
         :param role_id:  идентификатор роли пользователя
@@ -148,7 +148,6 @@ class User(BaseItem):
         :rtype: entities.User
         """
         GLog.info('Создание пользователя')
-        data.update({'role_id': role_id})
         res = User().load_from_json(data)
         res._create()
         return res
@@ -162,7 +161,7 @@ class User(BaseItem):
         :rtype: entities.User
         """
         GLog.info('Изменение пользователя')
-        data.update({'id': user_id})
+        data.update({'id': cls.check_int(user_id, 'идентификатор пользователя')})
         res = User().load_from_json(data)
         res._update()
         return res
@@ -175,7 +174,7 @@ class User(BaseItem):
         :rtype: None
         """
         GLog.info('Удаление пользователя')
-        res = User().load_from_json({'id': user_id})
+        res = User().load_from_json({'id': cls.check_int(user_id, 'идентификатор пользователя')})
         res._delete()
 
 
