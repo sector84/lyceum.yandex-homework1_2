@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Contacts</string>
+   <string>Учет доходов/расходов</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -52,17 +52,17 @@
           </column>
           <column>
            <property name="text">
-            <string>Имя</string>
+            <string>Дата</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Логин</string>
+            <string>Расход</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Администратор</string>
+            <string>Примечание</string>
            </property>
           </column>
          </widget>
@@ -75,7 +75,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTableWidget" name="tableExpenses_2">
+         <widget class="QTableWidget" name="tableIncomes">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -98,17 +98,17 @@
           </column>
           <column>
            <property name="text">
-            <string>Имя</string>
+            <string>Дата</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Логин</string>
+            <string>Доход</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Администратор</string>
+            <string>Примечание</string>
            </property>
           </column>
          </widget>
@@ -180,8 +180,18 @@
     <addaction name="actionEdit_item"/>
     <addaction name="actionRemove_item"/>
    </widget>
+   <widget class="QMenu" name="menuAdmin">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="title">
+     <string>Admin</string>
+    </property>
+    <addaction name="actionAdminUsers"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuAdmin"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -191,12 +201,12 @@
   </action>
   <action name="actionAdd_item">
    <property name="text">
-    <string>Add userr</string>
+    <string>Add item</string>
    </property>
   </action>
   <action name="actionRemove_item">
    <property name="text">
-    <string>Remove user</string>
+    <string>Remove item</string>
    </property>
   </action>
   <action name="actionSave">
@@ -211,7 +221,15 @@
   </action>
   <action name="actionEdit_item">
    <property name="text">
-    <string>Edit user</string>
+    <string>Edit item</string>
+   </property>
+  </action>
+  <action name="actionAdminUsers">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Управление пользователями</string>
    </property>
   </action>
  </widget>

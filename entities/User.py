@@ -85,6 +85,10 @@ class User(BaseItem):
         ])
 
     @property
+    def admin(self):
+        return self['is_admin'] > 0
+
+    @property
     def ID(self):
         return self['id']
 

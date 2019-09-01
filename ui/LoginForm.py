@@ -18,8 +18,11 @@ class LoginForm(QDialog):
         login = self.inputLogin.text()
         password = self.inputPass.text()
         GLog.info(f"ui.LoginForm.on_login :: try to login as: {login}")
-        user = User.select_by_credentials(login, password)
-        if user.ID > 0:
-            state.State[state.STATE_KEY_USER] = user
-            state.State[state.STATE_KEY_SECTION] = state.STATE_SECTION_MAIN_EXPENSES
-            self.on_login_success()
+        try:
+            user = User.select_by_credentials(login, password)
+            if user.ID > 0:
+                state.State[state.STATE_KEY_USER] = user
+                state.State[state.STATE_KEY_SECTION] = state.STATE_SECTION_MAIN_EXPENSES
+                self.on_login_success()
+        except Exception as e:
+            GLog.error("ui.LoginForm.on_login :: error: %s", e)

@@ -5,6 +5,7 @@ from ui import LoginForm, MainForm
 
 def on_login_success():
     loginForm.hide()
+    mainForm.recalc_elements_availability()
     mainForm.show()
 
 
