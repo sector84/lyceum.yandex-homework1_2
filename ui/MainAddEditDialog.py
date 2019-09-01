@@ -1,28 +1,19 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog
 from core.engine import GLog
-from entities import User
-import state
+from state import *
 
 
-class LoginForm(QDialog):
-    def __init__(self, on_login_success):
-        GLog.debug("ui.LoginForm.__init__")
-        super().__init__()
-        self.on_login_success = on_login_success
-        uic.loadUi('ui/loginForm.ui', self)
-        self.btnLogin.clicked.connect(self.on_login)
+class MainAddEditDialog(QDialog):
+    def __init__(self, *args):
+        GLog.debug("ui.MainAddEditDialog.__init__")
+        super().__init__(*args)
+        uic.loadUi('ui/mainAddEditDialog.ui', self)
+        self.btnSave.clicked.connect(self.accept)
+        self.btnCancel.clicked.connect(self.close)
+        self.init_value()
 
-    def on_login(self):
-        GLog.debug("ui.LoginForm.on_login")
-        login = self.inputLogin.text()
-        password = self.inputPass.text()
-        GLog.info(f"ui.LoginForm.on_login :: try to login as: {login}")
-        try:
-            user = User.select_by_credentials(login, password)
-            if user.ID > 0:
-                state.State[state.STATE_KEY_USER] = user
-                state.State[state.STATE_KEY_SECTION] = state.STATE_SECTION_MAIN_EXPENSES
-                self.on_login_success()
-        except Exception as e:
-            GLog.error("ui.LoginForm.on_login :: error: %s", e)
+    def init_value(self):
+        self.valueDoubleSpinBox.setValue(State[STATE_KEY_ELEMENT].get('value', 0) if State[STATE_KEY_ELEMENT] else 0)
+        self.dateTimeEdit.setDateTime(State[STATE_KEY_ELEMENT].get('date', '') if State[STATE_KEY_ELEMENT] else '')
+        self.noteTextEdit.setText(State[STATE_KEY_ELEMENT].get('note', '') if State[STATE_KEY_ELEMENT] else '')

@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from ui import LoginForm, MainForm, UsersForm, UserAddEditDialog
+from ui import LoginForm, MainForm, UsersForm, UserAddEditDialog, MainAddEditDialog
 from state import *
 
 
@@ -29,6 +29,7 @@ def on_login_success():
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainForm = MainForm(actualize_visual_state)
+    mainForm.add_edit_dialog = MainAddEditDialog(mainForm)
     usersForm = UsersForm(actualize_visual_state)
     usersForm.add_edit_dialog = UserAddEditDialog(usersForm)
     loginForm = LoginForm(on_login_success)
