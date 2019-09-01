@@ -6,9 +6,10 @@ import state
 
 
 class LoginForm(QDialog):
-    def __init__(self):
+    def __init__(self, on_login_success):
         GLog.debug("ui.LoginForm.__init__")
         super().__init__()
+        self.on_login_success = on_login_success
         uic.loadUi('ui/loginForm.ui', self)
         self.btnLogin.clicked.connect(self.on_login)
 
@@ -21,3 +22,4 @@ class LoginForm(QDialog):
         if user.ID > 0:
             state.State[state.STATE_KEY_USER] = user
             state.State[state.STATE_KEY_SECTION] = state.STATE_SECTION_MAIN_EXPENSES
+            self.on_login_success()
