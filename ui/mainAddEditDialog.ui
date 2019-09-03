@@ -31,7 +31,14 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QDoubleSpinBox" name="valueDoubleSpinBox"/>
+      <widget class="QDoubleSpinBox" name="valueDoubleSpinBox">
+       <property name="minimum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>10000000000.989999771118164</double>
+       </property>
+      </widget>
      </item>
      <item row="3" column="1">
       <widget class="QPlainTextEdit" name="noteTextEdit"/>
@@ -81,6 +88,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>valueDoubleSpinBox</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>noteTextEdit</tabstop>
+  <tabstop>btnSave</tabstop>
+  <tabstop>btnCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

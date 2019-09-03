@@ -17,6 +17,8 @@ class UsersForm(QMainWindow):
         uic.loadUi('ui/usersForm.ui', self)
         self.actionExit.triggered.connect(self.close)
         self.actionExit.setShortcut('Ctrl+W')
+        self.btnClose.clicked.connect(self.close)
+
         self.actionAdd_item.triggered.connect(self.add_item)
         self.btnAdd.clicked.connect(self.add_item)
         self.actionRemove_item.triggered.connect(self.remove_item)

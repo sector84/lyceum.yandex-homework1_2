@@ -135,21 +135,35 @@
       <item>
        <widget class="QPushButton" name="btnAdd">
         <property name="text">
-         <string>Add</string>
+         <string>Добавить</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btnEdit">
         <property name="text">
-         <string>Edit</string>
+         <string>Изменить</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btnRemove">
         <property name="text">
-         <string>Remove</string>
+         <string>Удалить</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnExit">
+        <property name="text">
+         <string>Выход</string>
         </property>
        </widget>
       </item>

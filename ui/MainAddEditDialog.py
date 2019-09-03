@@ -1,4 +1,5 @@
 from PyQt5 import uic
+from PyQt5.QtCore import QDateTime
 from PyQt5.QtWidgets import QDialog
 from core.engine import GLog
 from state import *
@@ -15,5 +16,7 @@ class MainAddEditDialog(QDialog):
 
     def init_value(self):
         self.valueDoubleSpinBox.setValue(State[STATE_KEY_ELEMENT].get('value', 0) if State[STATE_KEY_ELEMENT] else 0)
-        self.dateTimeEdit.setDateTime(State[STATE_KEY_ELEMENT].get('date', '') if State[STATE_KEY_ELEMENT] else '')
-        self.noteTextEdit.setText(State[STATE_KEY_ELEMENT].get('note', '') if State[STATE_KEY_ELEMENT] else '')
+        ts = State[STATE_KEY_ELEMENT].get('date', 0) if State[STATE_KEY_ELEMENT] else 0
+        d = QDateTime.fromSecsSinceEpoch(ts) if ts > 0 else QDateTime.currentDateTime()
+        self.dateTimeEdit.setDateTime(d)
+        self.noteTextEdit.setPlainText(State[STATE_KEY_ELEMENT].get('note', '') if State[STATE_KEY_ELEMENT] else '')

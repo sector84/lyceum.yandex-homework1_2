@@ -85,9 +85,13 @@ class Expense(BaseItem):
         self['id'] = self.check_int(new_one, 'Идентификатор расхода')
 
     @property
-    def date(self):
+    def date_str(self):
         # возвращаем в человеко-читаемом виде вместо unix timestamp
         return datetime.utcfromtimestamp(self['date']).strftime('%Y-%m-%d %H:%M:%S')
+
+    @property
+    def date(self):
+        return self['date']
 
     @date.setter
     def date(self, new_one):
